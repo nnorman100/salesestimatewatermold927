@@ -191,7 +191,7 @@ export const SAMPLE_JOBS: Record<string, JobState> = {
     financialTier: {
       subtotal: 1722.4,
       snappedTier: 2499.0,
-      tierName: 'Tier 3 - Multi-Room Loss & Vanity Detach',
+      tierName: 'Tier 3 - Multi-Room Loss & Heavy Demo',
       tierDescription: 'Multi-room loss, lower cabinet detach, and structural containment.',
       isCustomLargeLoss: false,
     },
