@@ -1,0 +1,85 @@
+{
+  "lineItemCount": 7,
+  "lineItems": [
+    {
+      "key": "standard_service_call",
+      "description": "Standard Service Call / Field Inspection",
+      "quantity": 1,
+      "qty": 1,
+      "unit": "EA",
+      "unitRate": 350,
+      "lineTotal": 350,
+      "notes": "Standard field assessment"
+    },
+    {
+      "key": "two_ft_flood_cut",
+      "description": "2-ft Flood Cut (Drywall + Batt Insulation Removal) (Master Bath)",
+      "quantity": 28,
+      "qty": 28,
+      "unit": "LF",
+      "unitRate": 14.5,
+      "lineTotal": 406,
+      "notes": "South and West walls"
+    },
+    {
+      "key": "baseboard_removal",
+      "description": "Baseboard Removal & Debris Disposal (Master Bath)",
+      "quantity": 28,
+      "qty": 28,
+      "unit": "LF",
+      "unitRate": 2.85,
+      "lineTotal": 79.8,
+      "notes": "Removal & Disposal"
+    },
+    {
+      "key": "tile_flooring_demo",
+      "description": "Ceramic / Porcelain Tile Flooring Demolition to Slab (Master Bath)",
+      "quantity": 50,
+      "qty": 50,
+      "unit": "SF",
+      "unitRate": 8.5,
+      "lineTotal": 425,
+      "notes": "Ceramic tile demo to slab"
+    },
+    {
+      "key": "vanity_detach_reset",
+      "description": "Vanity Cabinet Detach & Reset (with Collateral Waiver) (Master Bath)",
+      "quantity": 1,
+      "qty": 1,
+      "unit": "EA",
+      "unitRate": 285,
+      "lineTotal": 285,
+      "notes": "Double Vanity"
+    },
+    {
+      "key": "lgr_dehumidifier_day",
+      "description": "Low Grain Refrigerant (LGR) Dehumidifier Rental (Master Bath)",
+      "quantity": 1,
+      "qty": 1,
+      "days": 3,
+      "unit": "Day",
+      "unitRate": 145,
+      "lineTotal": 435,
+      "notes": "1 units x 3 days in Master Bath"
+    },
+    {
+      "key": "air_mover_day",
+      "description": "Centrifugal Air Mover Rental (Floor / Cavity) (Master Bath)",
+      "quantity": 2,
+      "qty": 2,
+      "days": 3,
+      "unit": "Day",
+      "unitRate": 38,
+      "lineTotal": 228,
+      "notes": "2 units x 3 days in Master Bath"
+    }
+  ],
+  "financialTier": {
+    "subtotal": 2208.8,
+    "snappedTier": 2499,
+    "tierName": "Tier 3 - Multi-Room Loss & Heavy Demo",
+    "tierDescription": "Multi-room loss, vanity detach, tile demolition",
+    "isCustomLargeLoss": false
+  },
+  "spokenResponse": ""
+}

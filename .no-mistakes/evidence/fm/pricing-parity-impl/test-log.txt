@@ -1,0 +1,52 @@
+=== SCENARIO 1: Manifest byte-match (live) ===
+$ python3 pricing_engine.py --emit-config > /tmp/emit.json && diff -q /tmp/emit.json pricing_manifest.json
+EQUAL
+bfc3ae003ba1e335fafd938d6a7e2d26  pricing_manifest.json
+
+=== SCENARIO 2: npm test parity suite (live) ===
+$ npm test 2>&1 | tail -15
+✓ Manifest byte-match: pricing_manifest.json == pricing_engine.py --emit-config.
+✓ All 12 rate-card descriptions, unit rates, and line totals match (incl. antimicrobial).
+✓ Psychrometrics parity across temperature/RH matrix (dew point + GPP).
+✓ Tier snapping parity (Tier 1 / 2 / 3 / 4 / 5 + large-loss boundary strings).
+✓ Tier 1 small scope: 1 line items + financialTier match across engines.
+✓ Tier 3 mid-scope (fixture): 7 line items + financialTier match across engines.
+✓ Tier 5 / large-loss boundary: 5 line items + financialTier match across engines.
+=== PRICING PARITY TEST PASSED ===
+
+=== SCENARIO 3: Drift detection (live adversarial) ===
+Tampered pricing_manifest.json items[0].rate 350 -> 999.99
+Result: PRICING PARITY FAILURES (16) -- byte-match drift + 15 cascading diffs, including tier transitions and tier-name/description strings.
+Restored manifest and re-ran: PASSED
+
+=== SCENARIO 4: Boundary rounding parity (live) ===
+7 psychrometrics cases (incl. .x5 boundaries) all ts==py
+11 tier-snap cases across all 5 tier boundaries all ts==py
+
+=== SCENARIO 5: Dead-import removal (live) ===
+$ grep -rn 'snapToFinancialTier\|calculatePsychrometrics' app/ components/
+components/TechnicianLandingPage.tsx:12:import { calculatePsychrometrics } from "@/services/pricingEngine";
+components/TechnicianLandingPage.tsx:36:  const psy = calculatePsychrometrics(
+components/TechnicianLandingPage.tsx:45:    const updatedPsy = calculatePsychrometrics(tempF, rhPercent);
+app/api/gemini/live-scope/route.ts: -- (no snapToFinancialTier, no calculatePsychrometrics)
+components/LiveScopingHUD.tsx: -- (no snapToFinancialTier)
+$ npx tsc --noEmit
+(exit 0)
+$ npm run build
+✓ Compiled successfully in 25.8s
+
+=== SCENARIO 6: AGENTS.md 5 tiers (live) ===
+$ grep -c '^.*Tier [0-9]' .agents/AGENTS.md
+6 (Tier 1..5 in body + 1 in heading context)
+$ grep -c '"name": "Tier' pricing_manifest.json
+5
+
+=== SCENARIO 7: README 100% parity claim corrected (live) ===
+$ git diff d0845854..b282c7d -- README.md
+-  - 100% cross-language serialization parity between Python (`pricing_engine.py`) and TypeScript (`pricingEngine.ts`).
++  - Rates and dollar totals match across Python (`pricing_engine.py`) and TypeScript (`pricingEngine.ts`); string display and the parity test live in `pricing_manifest.json` and `scripts/test_pricing.ts`.
+
+=== SCENARIO 8: Live dev server live-scope API (live) ===
+$ curl -X POST -H "Content-Type: application/json" -d @/tmp/live-body.json http://localhost:3001/api/gemini/live-scope
+financialTier: subtotal=2208.8, snappedTier=2499, tierName='Tier 3 - Multi-Room Loss & Heavy Demo'
+This is the route.ts file with dead imports removed; it uses calculatePricingFromJob to populate scopeItems + financialTier via the manifest.
