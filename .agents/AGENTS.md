@@ -115,9 +115,10 @@ Whenever water supply failure is inspected, identify the era-specific failure me
 Line item sums are automatically snapped to Alert Disaster Restoration standard tiers:
 - **Tier 1:** `$1,499.00` (Minor single-room containment and light drying)
 - **Tier 2:** `$1,999.00` (Standard room mitigation with 2-ft cuts and 3-day drying)
-- **Tier 3:** `$2,499.00` (Multi-room loss, vanity detach, tile demo)
+- **Tier 3:** `$2,499.00` (Multi-room loss, vanity detach, tile demolition)
 - **Tier 4:** `$2,799.00` (Extensive structural mitigation, heavy demo, Category 3 containment)
-*(Estimates exceeding $2,799.00 convert to customized large-loss itemized contracts).*
+- **Tier 5:** `$3,999.00` (Heavy multi-chamber mitigation, whole-structure drying, extensive demo)
+*(Estimates exceeding $3,999.00 convert to customized large-loss itemized contracts).*
 
 ---
 
@@ -137,7 +138,7 @@ When interacting with the web application frontend or parsing dictation turns, o
   "financialTier": {
     "subtotal": 1845.50,
     "snappedTier": 1999.00,
-    "tierName": "Tier 2 - Standard Chamber Mitigation"
+    "tierName": "Tier 2 - Standard Room Mitigation"
   },
   "californiaCompliance": {
     "isPre1978": true,

@@ -52,7 +52,7 @@ function createBaseJob(): JobState {
       subtotal: 350.0,
       snappedTier: 1499.0,
       tierName: "Tier 1 - Minor Chamber Containment & Drying",
-      tierDescription: "Minor single-room containment and light structural drying run.",
+      tierDescription: "Minor single-room containment and light drying",
       isCustomLargeLoss: false,
     },
   };
@@ -105,7 +105,7 @@ async function runTests() {
   const complexPricing = calculatePricingFromJob(complexJob);
   assert.strictEqual(complexPricing.subtotal, 2208.8);
   assert.strictEqual(complexPricing.financialTier.snappedTier, 2499.0);
-  assert.strictEqual(complexPricing.financialTier.tierName, "Tier 3 - Multi-Room Loss & Vanity Detach");
+  assert.strictEqual(complexPricing.financialTier.tierName, "Tier 3 - Multi-Room Loss & Heavy Demo");
   console.log(`✓ Complex scope subtotal: $${complexPricing.subtotal} successfully snapped to Tier 3 ($2499.00).`);
 
   // Test 3: Large loss conversion (> $3999)

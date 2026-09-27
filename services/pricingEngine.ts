@@ -4,100 +4,27 @@
  */
 
 import { FinancialTierInfo, ScopeLineItem, JobState } from '../types/estimator';
+import { pricingManifest, RateUnit } from './pricingManifest';
 
-export const RATE_SCHEDULE: Record<
+// Derived from the single-source-of-truth `pricing_manifest.json` (see services/pricingManifest.ts).
+// No rate, tier name, tier description, or large-loss string is hand-maintained in this file.
+const RATE_SCHEDULE: Record<
   string,
-  { description: string; unit: 'LF' | 'SF' | 'EA' | 'Day'; rate: number }
-> = {
-  standard_service_call: {
-    description: 'Standard Service Call / Field Inspection',
-    unit: 'EA',
-    rate: 350.0,
-  },
-  after_hours_service_call: {
-    description: 'After-Hours Emergency Service Call',
-    unit: 'EA',
-    rate: 525.0,
-  },
-  two_ft_flood_cut: {
-    description: '2-ft Flood Cut (Drywall + Batt Insulation Removal)',
-    unit: 'LF',
-    rate: 14.5,
-  },
-  four_ft_flood_cut: {
-    description: '4-ft Flood Cut (Drywall + Batt Insulation Removal)',
-    unit: 'LF',
-    rate: 22.0,
-  },
-  baseboard_removal: {
-    description: 'Baseboard Removal & Debris Disposal',
-    unit: 'LF',
-    rate: 2.85,
-  },
-  tile_flooring_demo: {
-    description: 'Ceramic / Porcelain Tile Flooring Demolition to Slab',
-    unit: 'SF',
-    rate: 8.5,
-  },
-  carpet_pad_pull: {
-    description: 'Carpet & Wet Pad Extraction, Cut & Pull',
-    unit: 'SF',
-    rate: 1.65,
-  },
-  vanity_detach_reset: {
-    description: 'Vanity Cabinet Detach & Reset (with Collateral Waiver)',
-    unit: 'EA',
-    rate: 285.0,
-  },
-  lgr_dehumidifier_day: {
-    description: 'Low Grain Refrigerant (LGR) Dehumidifier Rental',
-    unit: 'Day',
-    rate: 145.0,
-  },
-  air_mover_day: {
-    description: 'Centrifugal Air Mover Rental (Floor / Cavity)',
-    unit: 'Day',
-    rate: 38.0,
-  },
-  antimicrobial_spray: {
-    description: 'Antimicrobial Botanical Spray Application',
-    unit: 'SF',
-    rate: 0.42,
-  },
-  vinyl_flooring_demo: {
-    description: 'Vinyl / Linoleum Sheet Flooring Demolition to Subfloor',
-    unit: 'SF',
-    rate: 3.5,
-  },
-};
+  { description: string; unit: RateUnit; rate: number }
+> = Object.fromEntries(
+  pricingManifest.items.map((item) => [
+    item.id,
+    { description: item.description, unit: item.unit, rate: item.rate },
+  ]),
+);
 
-export const TIERS = [
-  {
-    tier: 1499.0,
-    name: 'Tier 1 - Minor Chamber Containment & Drying',
-    description: 'Minor single-room containment and light structural drying run.',
-  },
-  {
-    tier: 1999.0,
-    name: 'Tier 2 - Standard Room Mitigation',
-    description: 'Standard room mitigation with 2-ft cuts and 3-day commercial drying.',
-  },
-  {
-    tier: 2499.0,
-    name: 'Tier 3 - Multi-Room Loss & Vanity Detach',
-    description: 'Multi-room loss, vanity detachment, tile demo, and structural containment.',
-  },
-  {
-    tier: 2799.0,
-    name: 'Tier 4 - Extensive Structural Mitigation',
-    description: 'Extensive structural mitigation, heavy demo, Category 3 black water protocols.',
-  },
-  {
-    tier: 3999.0,
-    name: 'Tier 5 - Heavy Multi-Chamber Mitigation',
-    description: 'Heavy multi-chamber mitigation, whole-structure drying, extensive demo.',
-  },
-];
+const TIERS = pricingManifest.tiers.map((tier) => ({
+  tier: tier.threshold,
+  name: tier.name,
+  description: tier.description,
+}));
+
+const LARGE_LOSS = pricingManifest.largeLoss;
 
 export function snapToFinancialTier(subtotal: number): FinancialTierInfo {
   for (const t of TIERS) {
@@ -115,13 +42,14 @@ export function snapToFinancialTier(subtotal: number): FinancialTierInfo {
   return {
     subtotal: Math.round(subtotal * 100) / 100,
     snappedTier: Math.round(subtotal * 100) / 100,
-    tierName: 'Custom Large-Loss Itemized Contract',
-    tierDescription: 'Exceeds standard Flat-Fee tiers. Custom multi-day carrier audit schedule.',
+    tierName: LARGE_LOSS.name,
+    tierDescription: LARGE_LOSS.description,
     isCustomLargeLoss: true,
   };
 }
 
 export function calculatePsychrometrics(tempF: number, rhPercent: number) {
+  // Math.round is half-up; matches pricing_engine.py's _round_half_up so both engines agree on .x5 boundaries.
   const tempC = ((tempF - 32.0) * 5.0) / 9.0;
   const rhClamped = Math.max(0.01, Math.min(100.0, rhPercent));
   const eS = 6.112 * Math.exp((17.67 * tempC) / (tempC + 243.5));
@@ -153,12 +81,8 @@ export function calculatePricingFromJob(job: JobState): {
   // 1. Service Call
   const serviceKey = job.isAfterHours ? 'after_hours_service_call' : 'standard_service_call';
   const serviceInfo = RATE_SCHEDULE[serviceKey];
-  const serviceRate = serviceInfo?.rate || (job.isAfterHours ? 525.0 : 350.0);
-  const serviceDesc =
-    serviceInfo?.description ||
-    (job.isAfterHours
-      ? 'After-Hours Emergency Service Call'
-      : 'Standard Service Call / Field Inspection');
+  const serviceRate = serviceInfo.rate;
+  const serviceDesc = serviceInfo.description;
 
   lineItems.push({
     key: serviceKey,
@@ -177,8 +101,8 @@ export function calculatePricingFromJob(job: JobState): {
     if (ch.demolition?.floodCuts && ch.demolition.floodCuts.linearFeet > 0) {
       const ht = ch.demolition.floodCuts.heightFt;
       const key = ht === 4 ? 'four_ft_flood_cut' : 'two_ft_flood_cut';
-      const rate = RATE_SCHEDULE[key]?.rate || (ht === 4 ? 22.0 : 14.5);
-      const desc = RATE_SCHEDULE[key]?.description || `${ht}-ft Flood Cut`;
+      const rate = RATE_SCHEDULE[key].rate;
+      const desc = RATE_SCHEDULE[key].description;
       const lf = ch.demolition.floodCuts.linearFeet;
       const total = Math.round(lf * rate * 100) / 100;
       lineItems.push({
@@ -196,8 +120,8 @@ export function calculatePricingFromJob(job: JobState): {
 
     if (ch.demolition?.baseboards && ch.demolition.baseboards.linearFeet > 0) {
       const key = 'baseboard_removal';
-      const rate = RATE_SCHEDULE[key]?.rate || 2.85;
-      const desc = RATE_SCHEDULE[key]?.description || 'Baseboard Removal & Debris Disposal';
+      const rate = RATE_SCHEDULE[key].rate;
+      const desc = RATE_SCHEDULE[key].description;
       const lf = ch.demolition.baseboards.linearFeet;
       const total = Math.round(lf * rate * 100) / 100;
       lineItems.push({
@@ -225,8 +149,8 @@ export function calculatePricingFromJob(job: JobState): {
       ) {
         key = 'vinyl_flooring_demo';
       }
-      const rate = RATE_SCHEDULE[key]?.rate || 8.5;
-      const desc = RATE_SCHEDULE[key]?.description || 'Flooring Demolition';
+      const rate = RATE_SCHEDULE[key].rate;
+      const desc = RATE_SCHEDULE[key].description;
       const sf = ch.demolition.flooring.squareFeet;
       const total = Math.round(sf * rate * 100) / 100;
       lineItems.push({
@@ -244,8 +168,8 @@ export function calculatePricingFromJob(job: JobState): {
 
     if (ch.cabinetry && ch.cabinetry.length > 0) {
       const key = 'vanity_detach_reset';
-      const rate = RATE_SCHEDULE[key]?.rate || 285.0;
-      const desc = RATE_SCHEDULE[key]?.description || 'Vanity Cabinet Detach & Reset';
+      const rate = RATE_SCHEDULE[key].rate;
+      const desc = RATE_SCHEDULE[key].description;
       const count = ch.cabinetry.length;
       const total = Math.round(count * rate * 100) / 100;
       lineItems.push({
@@ -265,10 +189,8 @@ export function calculatePricingFromJob(job: JobState): {
       if (eq.count > 0 && eq.days > 0) {
         const isLGR = eq.type.includes('LGR') || eq.type.toLowerCase().includes('dehumidifier');
         const key = isLGR ? 'lgr_dehumidifier_day' : 'air_mover_day';
-        const rate = RATE_SCHEDULE[key]?.rate || (isLGR ? 145.0 : 38.0);
-        const desc =
-          RATE_SCHEDULE[key]?.description ||
-          (isLGR ? 'LGR Dehumidifier Rental' : 'Centrifugal Air Mover Rental');
+        const rate = RATE_SCHEDULE[key].rate;
+        const desc = RATE_SCHEDULE[key].description;
         const total = Math.round(eq.count * eq.days * rate * 100) / 100;
         lineItems.push({
           key,

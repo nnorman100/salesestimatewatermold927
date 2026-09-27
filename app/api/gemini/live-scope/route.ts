@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { snapToFinancialTier, calculatePricingFromJob, calculatePsychrometrics } from "@/services/pricingEngine";
+import { calculatePricingFromJob } from "@/services/pricingEngine";
 import { JobState, ChamberScope } from "@/types/estimator";
 import { executeAntigravityScopingTurn } from "@/server/handleScopingInteraction";
 

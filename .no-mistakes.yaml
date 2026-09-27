@@ -1,0 +1,6 @@
+# Per-repo no-mistakes override: pin agent to pi because the Claude Code
+# subscription is disabled in this environment (the no-mistakes pipeline's
+# review/test/document/lint steps all use the configured agent and fail with
+# "Your organization has disabled Claude subscription access for Claude Code").
+# Pinning to pi here is local to this repo and reversible.
+agent: pi
