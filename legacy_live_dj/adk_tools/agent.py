@@ -35,7 +35,7 @@ root_agent = Agent(
     model=Gemini(
         model=os.getenv("LIVE_MODEL", "gemini-3.1-flash-live-preview"),
         speech_config=types.SpeechConfig(voice_config=types.VoiceConfig(
-            prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=os.getenv("LIVE_VOICE", "Aoede")))),
+            prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=os.getenv("LIVE_VOICE", "Charon")))),
     ),
     name="mira",
     instruction=MIRA_INSTRUCTION + _POLICY_NOTE,

@@ -1,0 +1,31 @@
+{
+  "jobId": "ADR-INITIAL-JOB",
+  "clientName": "",
+  "clientPhone": "",
+  "propertyAddress": "",
+  "buildYear": 1985,
+  "isPre1978": false,
+  "isAfterHours": true,
+  "damageType": "Water",
+  "lossCategory": "Category 2 (Grey Water)",
+  "baseline": {
+    "unaffectedRoomName": "Living Room (Dry Baseline)",
+    "drywallWmePercent": 9.2,
+    "ambientTempF": 72.0,
+    "ambientRhPercent": 45.0
+  },
+  "chambers": [],
+  "currentChamberIndex": 0,
+  "financialTier": {
+    "calculatedSubtotal": 0.00,
+    "snappedTier": 1499.00,
+    "tierName": "Tier 1 - Minimum Mitigation Service"
+  },
+  "californiaCompliance": {
+    "leadTestingDisclosed": false,
+    "asbestosTestingDisclosed": false,
+    "mandatedTestingRequired": false,
+    "statutoryCitations": []
+  },
+  "isComplete": false
+}

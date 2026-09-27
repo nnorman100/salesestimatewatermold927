@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alert Disaster Restoration — Remediation Estimate</title>
+  <style>
+    @page { size: letter portrait; margin: 0.35in 0.4in; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #0f172a; font-size: 9.5pt; line-height: 1.32; margin: 0; background: #fff; }
+    .page { page-break-after: always; page-break-inside: avoid; height: 10.2in; max-height: 10.2in; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 0.1in 0; }
+    .page:last-child { page-break-after: avoid; }
+    
+    .header { border-bottom: 2.5px solid #dc2626; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .brand-title { font-size: 16pt; font-weight: 900; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1; }
+    .brand-slogan { font-size: 8.5pt; font-style: italic; font-weight: 600; color: #334155; margin-top: 2px; }
+    .brand-sub { font-size: 7.5pt; color: #475569; margin-top: 3px; line-height: 1.25; }
+    
+    .meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 8px; margin: 6px 0; font-size: 8pt; line-height: 1.3; }
+    .doc-title-bar { text-align: center; margin: 6px 0 4px 0; }
+    .doc-title { font-size: 11pt; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1.5px solid #0f172a; display: inline-block; padding: 0 12px 2px 12px; }
+    
+    .section-title { font-size: 8.5pt; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 6px 0 2px 0; }
+    .findings-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 5px 8px; font-size: 8pt; line-height: 1.3; margin-bottom: 6px; }
+    .pretest-alert { background: #fef2f2; border: 1px solid #f87171; color: #991b1b; padding: 4px 6px; border-radius: 3px; font-weight: 600; margin-bottom: 4px; font-size: 7.8pt; }
+    
+    .scope-table { width: 100%; border-collapse: collapse; margin-top: 3px; margin-bottom: 4px; }
+    .scope-table th { background: #f1f5f9; text-align: left; padding: 3px 5px; font-size: 7.5pt; text-transform: uppercase; border: 1px solid #cbd5e1; }
+    .scope-table td { padding: 3px 5px; border: 1px solid #e2e8f0; font-size: 7.8pt; line-height: 1.25; }
+    
+    .cost-banner { background: #fef2f2; border: 1.5px solid #dc2626; border-radius: 4px; padding: 6px 10px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+    .cost-headline { font-size: 10.5pt; font-weight: 900; color: #991b1b; }
+    .cost-sub { font-size: 7.5pt; color: #64748b; }
+    .tier-badge { background: #dc2626; color: white; padding: 4px 10px; font-size: 10pt; font-weight: bold; border-radius: 3px; display: inline-block; }
+    
+    .notes-box { border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 8px; font-size: 7.2pt; color: #475569; line-height: 1.3; }
+    .signature-line { border-bottom: 1px solid #000; height: 26px; margin-top: 10px; }
+    .footer-bar { border-top: 1px solid #e2e8f0; padding-top: 3px; font-size: 7pt; color: #94a3b8; display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= PAGE 1: REMEDIATION ESTIMATE ================= -->
+  <div class="page">
+    <div>
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="brand-title">Alert Disaster Restoration</div>
+          <div class="brand-slogan">&ldquo;Making It New Again&rdquo;</div>
+          <div class="brand-sub">
+            3300 Patton Way Ste. 1, Bakersfield, CA 93308 &bull; Tel: (661) 396-7908 &bull; Emergency: (877) 435-8117 &bull; Fax: (661) 615-3350<br>
+            Mailing: PO Box 20729, Bakersfield, CA 93390-0729 &bull; CA License #950983 &bull; www.AlertDisaster.com
+          </div>
+        </div>
+        <div style="text-align: right; font-size: 8pt; color: #334155; line-height: 1.25;">
+          <strong>ESTIMATE #:</strong> {{JOB_ID}}<br>
+          <strong>DATE:</strong> {{CURRENT_DATE}}<br>
+          <strong>BUILD YEAR:</strong> {{BUILD_YEAR}}
+        </div>
+      </div>
+
+      <!-- Customer / Loss Details -->
+      <div class="meta-box">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <strong>TO:</strong> {{CLIENT_NAME}} &bull; <strong>PHONE:</strong> {{CLIENT_PHONE}}<br>
+            <strong>PROPERTY ADDRESS:</strong> {{PROPERTY_ADDRESS}}
+          </div>
+          <div style="text-align: right;">
+            <strong>INSURANCE / CLAIM:</strong> {{CARRIER_INFO}}<br>
+            <strong>ESTIMATOR:</strong> Matthew Myers, Alert Disaster Restoration
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Title -->
+      <div class="doc-title-bar">
+        <div class="doc-title">Remediation Estimate</div>
+      </div>
+
+      <!-- 1. AREA INSPECTED -->
+      <div style="margin-bottom: 4px; font-size: 8pt;">
+        <strong style="text-transform: uppercase;">Area Inspected:</strong> {{AREA_INSPECTED}}
+      </div>
+
+      <!-- 2. FINDINGS -->
+      <div class="findings-box">
+        <div style="font-weight: 800; text-transform: uppercase; color: #0f172a; margin-bottom: 2px;">Findings:</div>
+        <div>{{STATUTORY_DISCLOSURE_TEXT}}</div>
+        <div style="margin-top: 3px; color: #475569;">
+          Dry baseline standard calibrated at <strong>{{DRY_TARGET_WME}}% WME</strong>. Readings in affected chambers indicate active moisture intrusion across structural drywall, baseboards, and floor assemblies.
+        </div>
+      </div>
+
+      <!-- 3. RECOMMENDATION -->
+      <div>
+        <div class="section-title">Recommendation:</div>
+        <div style="font-size: 7.5pt; color: #475569; margin-bottom: 3px;">
+          Alert Disaster Restoration to follow IICRC and EPA protocols for safety, containments, personal protective equipment (PPE), and disposal of materials.
+          {{TESTING_RECOMMENDATION_NOTE}}
+        </div>
+
+        <table class="scope-table">
+          <thead>
+            <tr>
+              <th style="width: 22%;">Room / Chamber</th>
+              <th style="width: 48%;">Scope Action &amp; Standardized Details</th>
+              <th style="width: 12%;">Qty / Dim</th>
+              <th style="width: 18%;">Compliance / Waiver</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{SCOPE_ROWS_HTML}}
+          </tbody>
+        </table>
+        <div style="font-size: 7.2pt; color: #64748b; font-style: italic;">
+          Apply EPA-registered botanical antimicrobial solution and mold-inhibiting primer to all exposed framing studs.
+        </div>
+      </div>
+
+      <!-- 4. PROPOSED COST -->
+      <div class="cost-banner">
+        <div>
+          <div class="cost-headline">{{PROPOSED_COST_TEXT}}</div>
+          <div class="cost-sub">Billing Structure: {{TIER_NAME}} &bull; Deterministic ADR Standard Rate Schedule</div>
+        </div>
+        <div>
+          <div class="tier-badge">{{SNAPPED_TIER_AMOUNT}}</div>
+        </div>
+      </div>
+
+      <!-- 5. NOTES & DISCLAIMERS -->
+      <div class="notes-box">
+        <strong style="text-transform: uppercase; color: #1e293b;">Notes &amp; Disclaimers:</strong><br>
+        &bull; <strong>NOTE:</strong> This estimate does NOT include reconstruction after remediation is completed.<br>
+        &bull; Alert Disaster Restoration is not responsible for collateral damage to existing materials during selective demolition.<br>
+        &bull; If this estimate is submitted to an insurance carrier, pricing may be adjusted in accordance with standard Xactimate pricing guidelines.<br>
+        &bull; <em>Estimate is valid for 30 days from date of inspection.</em>
+        <div style="margin-top: 4px; display: flex; justify-content: space-between; font-weight: 700; color: #0f172a;">
+          <span>Matthew Myers, Alert Disaster Restoration</span>
+          <span>CSLB CA License #950983</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 1 Footer -->
+    <div class="footer-bar">
+      <span>Alert Disaster Restoration &bull; 3300 Patton Way Ste. 1, Bakersfield, CA 93308 &bull; (661) 396-7908</span>
+      <span>Page 1 of 2 &bull; Remediation Estimate</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: TERMS & E-SIGNATURE ================= -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div>
+          <div class="brand-title" style="font-size: 14pt;">Alert Disaster Restoration &mdash; Page 2</div>
+          <div class="brand-sub">3300 Patton Way Ste. 1, Bakersfield, CA 93308 &bull; CA License #950983</div>
+        </div>
+        <div style="text-align: right; font-size: 8pt; color: #475569;">
+          <strong>Job Ref:</strong> {{JOB_ID}}<br>
+          <strong>Property:</strong> {{PROPERTY_ADDRESS}}
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 10px;">Standard Terms, Assignment of Benefits &amp; Statutory Disclosures</div>
+
+      <div style="font-size: 8pt; color: #334155; line-height: 1.35; text-align: justify; margin-top: 6px;">
+        <p style="margin: 4px 0;">
+          1. <strong>Authorization to Perform Work:</strong> The undersigned property owner or authorized agent hereby authorizes Alert Disaster Restoration (ADR) to enter the premises, perform emergency mitigation, structural drying, and hazardous material containment as scoped on Page 1 of this Remediation Estimate.
+        </p>
+        <p style="margin: 4px 0;">
+          2. <strong>Direct Payment Authorization &amp; Assignment of Benefits:</strong> Owner hereby assigns all insurance rights, benefits, and proceeds payable for services rendered directly to Alert Disaster Restoration. Owner instructs insurance carrier to name ADR as primary payee on all drafts. In the event insurance proceeds do not satisfy the invoice, owner remains contractually responsible for the unpaid balance.
+        </p>
+        <p style="margin: 4px 0;">
+          3. <strong>Collateral Breakage &amp; Homeowner Responsibilities:</strong> ADR is not responsible for pre-existing structural decay, dry rot, hairline tile fractures occurring during baseboard/drywall flood cuts, or stone/granite countertop fracture during cabinet detachments. Homeowner agrees to perform all items marked as homeowner obligations before work begins.
+        </p>
+        <p style="margin: 4px 0;">
+          4. <strong>Right of Cancellation &amp; Emergency Commencing:</strong> Emergency mitigation services commence immediately upon execution to prevent secondary microbial amplification, moisture migration, and structural decay.
+        </p>
+        <p style="margin: 4px 0;">
+          5. <strong>Notice of California Mechanics Lien Law (Cal. Civ. Code &sect; 8400 et seq.):</strong> Anyone who helps improve your property, but who is not paid, may record what is called a mechanics lien on your property. Under California law, failure to remit payment for authorized emergency restoration services, materials, or equipment deployed may subject the subject property to foreclosure under a recorded mechanics lien.
+        </p>
+        {{PRE1978_LEGAL_CLAUSE}}
+      </div>
+    </div>
+
+    <!-- Signature Block -->
+    <div>
+      <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; margin-bottom: 6px;">
+        <strong style="font-size: 8.5pt; text-transform: uppercase; color: #0f172a;">Property Owner / Agent Signature Authorization:</strong>
+        {{SIGNATURE_BLOCK_HTML}}
+        <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 7.5pt; color: #64748b;">
+          <span>Authorized Signature</span>
+          <span>Printed Name: {{CLIENT_NAME}}</span>
+          <span>Date: {{CURRENT_DATE}}</span>
+        </div>
+      </div>
+
+      <!-- Page 2 Footer -->
+      <div class="footer-bar">
+        <span>Alert Disaster Restoration &bull; Bakersfield, CA &bull; CA License #950983</span>
+        <span>Page 2 of 2 &bull; Client Authorization &amp; Terms</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

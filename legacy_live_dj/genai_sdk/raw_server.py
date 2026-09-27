@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("live-dj")
 
 MODEL = os.getenv("LIVE_MODEL", "gemini-3.1-flash-live-preview")
-VOICE = os.getenv("LIVE_VOICE", "Aoede")
+VOICE = os.getenv("LIVE_VOICE", "Charon")
 
 client = genai.Client()  # reads GOOGLE_API_KEY + GOOGLE_GENAI_USE_VERTEXAI=FALSE from .env
 

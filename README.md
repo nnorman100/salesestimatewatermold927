@@ -1,52 +1,100 @@
-# live-dj — a voice agent you can interrupt
+# Alert Disaster Restoration — Real-Time Field Scoping Copilot
 
-Talk to **Mira**, a late-night radio DJ. Ask her to play something. Talk over her mid-sentence and she stops, listens, and picks the thread back up.
+An AI-powered, real-time forensic restoration engineering and field scoping copilot designed for emergency water, fire, and mold loss inspections. Built for field technicians operating single-ear Bluetooth headsets in high-noise environments (air movers / LGR dehumidifiers running at 65–75 dB).
 
-Built on the **Gemini Live API** — three times over, with the same browser and the same Mira: raw SDK, then ADK, then ADK with real abilities and a policy gate — so you can see exactly what each layer buys you.
+---
 
-![live-dj](docs/screenshot.png)
+## Key Features
 
-## Three builds, one app
+- **Gemini Live Multimodal Voice Copilot:**
+  - Configured with the **`Charon`** voice (authoritative, grounded clinical dispatch tone).
+  - Silent during routine dictation (`spokenResponse: ""`); speaks only 1–2 sentence verifications upon room verification (`verify_room_scope`) or walkthrough completion (`complete_walkthrough`).
+  - Pre-warmed Web Audio context with automated `.resume()` to satisfy mobile iOS/WebKit audio policies.
 
-| Folder | Episode | What's inside |
-|---|---|---|
-| [`genai_sdk/`](genai_sdk/) | **EP1** — raw `google-genai` SDK | The whole primitive with no framework: a **39-line** `raw_minimal.py`, the full `raw_server.py`, and the gotcha that makes voice agents go silent after one sentence. |
-| [`adk/`](adk/) | **EP2** — Google ADK | The same DJ rebuilt on `LiveRequestQueue` + `run_live` + plain-function tools — plus how to run her inside **`adk web`** and watch the tool calls land as events. |
-| [`adk_tools/`](adk_tools/) | **EP3** — abilities | A new tool she can act on mid-sentence (`set_sleep_timer`), and **one policy door** every tool call passes through — a `before_tool_callback` that observes or **blocks**, with an action log that shows the verdict live. |
+- **Deterministic Pricing Engine & Tier Snapping:**
+  - Code-backed rate schedule strictly enforces non-hallucinated math.
+  - Automatically snaps subtotal to standard Alert Disaster Restoration Flat Fee Tiers ($1,499, $1,999, $2,499, $2,799, $3,999) or transitions into custom large-loss contracts.
+  - 100% cross-language serialization parity between Python (`pricing_engine.py`) and TypeScript (`pricingEngine.ts`).
 
-`frontend/` and `assets/` sit at the root because EP1 and EP2 share them **byte for byte** — that's the point. EP3 ships its own copy of the frontend (it grows an action-log panel).
+- **California Statutory Compliance & Forensic Plumbing:**
+  - Automated detection of building age against the California 1978 cutoff.
+  - Strict Cal/OSHA Title 8 CCR § 1529 (Asbestos), § 1532.1 (Lead), and Health & Safety Code § 25914 compliance notices on all pre-1978 scopes.
+  - Era-specific forensic plumbing failure analysis (Galvanized, Polybutylene PB-2110, CPVC, and PEX).
 
-## Quick start
+- **Offline Dead-Zone Resilience:**
+  - IndexedDB storage engine (`lib/offlineStorage.ts`) caches field inspection turns in subgrade basements and crawlspaces with zero cell reception.
+  - State-chaining queue replay automatically pushes pending turns to the backend sequentially upon signal recovery.
+
+- **Google Maps Platform Integration:**
+  - Modern Places API (New) address search with session tokens (`AutocompleteSessionToken`) to bundle keystrokes into single billed sessions.
+  - Instant property geocoding and Kern County / Central California field presets.
+
+- **Official 2-Page Proposal Generation:**
+  - Client-side digital signature pad with Retina DPR scaling.
+  - Headless Chromium and Python PDF compilation engine (`compile_proposal.py`) outputs print-ready Alert Disaster Restoration proposals with complete letterhead and assignment of benefits.
+
+---
+
+## Tech Stack
+
+- **Frontend:** Next.js 15 (App Router, Standalone Output), React 19, Tailwind CSS, Lucide Icons, Shadcn UI
+- **AI & Audio:** Google GenAI SDK (Gemini 2.0 Flash / Gemini Multimodal Live, Gemini 3.8 TTS), Web Speech API, Web Audio API
+- **Backend & Cloud:** Node.js, Python 3, Google Cloud Run (Containerized via Docker), Firebase / Firestore
+- **Mapping:** `@googlemaps/js-api-loader`, Google Places API (New)
+
+---
+
+## Getting Started
+
+### 1. Installation
 
 ```bash
-uv sync
-cp .env.example .env          # paste your GOOGLE_API_KEY (Gemini Developer API / AI Studio, not Vertex)
-
-uv run uvicorn genai_sdk.raw_server:app --port 8000     # EP1 · the DJ on the raw SDK
-uv run uvicorn adk.server:app --port 8000               # EP2 · the same DJ on ADK
-uv run uvicorn adk_tools.server:app --port 8000         # EP3 · abilities + the policy gate (QUIET_HOURS=1 for the blocked take)
-uv run adk web . --port 8000                            # EP2/EP3 · the same agents inside ADK's dev UI
+npm install
 ```
 
-Open <http://localhost:8000>, **put headphones on** (otherwise she hears her own radio), tap 🎙 and talk.
+### 2. Environment Configuration
 
-Try: *"hey Mira"* · *"can you play something dream pop"* · *"skip this"* · *"what do you think of the music?"* — then **talk over her** while she's speaking.
+Copy the example environment configuration and add your API keys:
 
-## What's shared
+```bash
+cp .env.example .env.local
+```
 
-| | |
-|---|---|
-| `frontend/` | minimal browser client: 16 kHz mic worklet, 24 kHz playback, client-side barge-in, music ducking |
-| `assets/tracks/` · `assets/mira_persona.txt` | four dream-pop tracks and who Mira is |
-| `docs/` | architecture diagrams for all three builds, the product / UX / engineering design docs, the de-risk test |
+Configure your keys in `.env.local`:
+```env
+GOOGLE_API_KEY="YOUR_GEMINI_API_KEY"
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="YOUR_GOOGLE_MAPS_API_KEY"
+LIVE_MODEL="gemini-2.0-flash-exp"
+LIVE_VOICE="Charon"
+```
 
-## Notes
+### 3. Local Development
 
-- **Voice** is a Gemini Live *native* voice (`LIVE_VOICE`, default `Aoede`) — the Live API has its own voice set, so it can't reproduce a TTS voice you used elsewhere. The persona carries the character, not the timbre.
-- **Barge-in** is client-side: the browser cuts playback the instant the mic hears you (RMS gate in `frontend/main.js`), which feels faster than waiting for the server signal. The server forwards `interrupted` too.
-- **Music ducking** drops the track to 12% while Mira speaks, then brings it back.
-- The four tracks and Mira's persona come from **aniradio**, a static AI-radio app of mine — the music is generated with **Lyria 3 Pro**.
+```bash
+npm run dev
+```
 
-## Going deeper
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-A second ADK live app (NOVA — voice + camera) plus a raw-SDK-vs-ADK exercise lives in [`cuppibla/multimodal-levels`](https://github.com/cuppibla/multimodal-levels) → `05-live/`.
+### 4. Running Verification Tests
+
+```bash
+npm test
+```
+
+Executes the 14-test end-to-end integration suite covering service calls, tier snapping, large-loss conversions, room verification phrasing, thermal delta extraction, and Python/TypeScript pricing interoperability.
+
+### 5. Production Build & Deployment
+
+```bash
+npm run build
+```
+
+Deploy to Google Cloud Run:
+```bash
+gcloud run deploy alert-disaster-field-estimator \
+  --source . \
+  --project mitigation-project \
+  --region us-west2 \
+  --allow-unauthenticated
+```

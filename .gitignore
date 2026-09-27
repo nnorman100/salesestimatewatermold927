@@ -1,4 +1,8 @@
 .env
+.env*.local
+.env.local
+.env.production
+.env*.production
 __pycache__/
 *.pyc
 .venv/
@@ -6,3 +10,8 @@ node_modules/
 .next/
 .DS_Store
 .adk/
+tsconfig.tsbuildinfo
+job_state.json
+current_scope.json
+proposal.html
+proposal.pdf
