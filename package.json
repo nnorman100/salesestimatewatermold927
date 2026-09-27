@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx scripts/test_fixes.ts && tsx scripts/test_pricing.ts",
-    "pricing:sync": "node scripts/pricing_sync.mjs"
+    "test": "tsx scripts/test_fixes.ts && tsx scripts/test_pricing.ts"
   },
   "dependencies": {
     "@google/genai": "latest",

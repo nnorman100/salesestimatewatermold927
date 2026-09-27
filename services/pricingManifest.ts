@@ -3,9 +3,9 @@
  * large-loss display strings.
  *
  * Generated from `pricing_engine.py --emit-config` (the Python engine is the
- * canonical owner of these values). Keep it in sync via `npm run pricing:sync`;
- * `scripts/test_pricing.ts` byte-matches `pricing_manifest.json` against the
- * live Python output so any drift fails CI.
+ * canonical owner of these values); `scripts/test_pricing.ts` byte-matches
+ * `pricing_manifest.json` against the live Python output so any drift fails
+ * the `npm test` parity check.
  */
 
 import manifest from "../pricing_manifest.json";

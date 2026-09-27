@@ -299,13 +299,7 @@ def main():
     parser.add_argument(
         "--emit-config",
         action="store_true",
-        help="Emit the canonical pricing_manifest.json (rate card, tier table, large-loss text).",
-    )
-    parser.add_argument(
-        "--out",
-        type=str,
-        default=None,
-        help="Write --emit-config output to this path instead of stdout.",
+        help="Emit the canonical pricing_manifest.json (rate card, tier table, large-loss text) to stdout.",
     )
     parser.add_argument(
         "scope_file",
@@ -316,11 +310,7 @@ def main():
     args = parser.parse_args()
 
     if args.emit_config:
-        manifest_text = json.dumps(emit_config(), indent=2) + "\n"
-        if args.out:
-            Path(args.out).write_text(manifest_text, encoding="utf-8")
-        else:
-            sys.stdout.write(manifest_text)
+        sys.stdout.write(json.dumps(emit_config(), indent=2) + "\n")
         return
 
     input_file = Path(args.scope_file)
