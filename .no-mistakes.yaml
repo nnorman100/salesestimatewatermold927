@@ -1,0 +1,6 @@
+# Pin the gate's pipeline agent to pi. The Claude Code subscription is
+# disabled in this organization, so any agent: auto or agent: claude
+# setting fails the pipeline at the first Claude-dependent step. This
+# file is trusted only from the default-branch copy, so a feature branch
+# cannot silently change it.
+agent: pi
