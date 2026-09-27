@@ -378,7 +378,7 @@ export function LiveScopingHUD({
           <Volume2 className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <div className="text-xs">
             <strong className="text-red-900 block font-bold">Spoken Verification Audio Output:</strong>
-            <p className="text-slate-800 italic mt-0.5">"{lastSpokenResponse}"</p>
+            <p className="text-slate-800 italic mt-0.5">&quot;{lastSpokenResponse}&quot;</p>
           </div>
         </div>
       )}
@@ -549,7 +549,7 @@ export function LiveScopingHUD({
         </Card>
       ) : (
         <div className="text-center p-8 bg-slate-50 rounded-lg border border-dashed text-slate-500">
-          No chambers added. Click "+ Add Room" above to establish your first containment chamber.
+          No chambers added. Click &quot;+ Add Room&quot; above to establish your first containment chamber.
         </div>
       )}
 
