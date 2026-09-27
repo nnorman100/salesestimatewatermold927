@@ -9,7 +9,6 @@ yarn-error.log*
 .pnpm-debug.log*
 .env*.local
 .env
-legacy_live_dj
 Dockerfile
 .dockerignore
 proposal.pdf
