@@ -1,0 +1,107 @@
+{
+  "items": [
+    {
+      "id": "standard_service_call",
+      "description": "Standard Service Call / Field Inspection",
+      "unit": "EA",
+      "rate": 350.0
+    },
+    {
+      "id": "after_hours_service_call",
+      "description": "After-Hours Emergency Service Call",
+      "unit": "EA",
+      "rate": 525.0
+    },
+    {
+      "id": "two_ft_flood_cut",
+      "description": "2-ft Flood Cut (Drywall + Batt Insulation Removal)",
+      "unit": "LF",
+      "rate": 14.5
+    },
+    {
+      "id": "four_ft_flood_cut",
+      "description": "4-ft Flood Cut (Drywall + Batt Insulation Removal)",
+      "unit": "LF",
+      "rate": 22.0
+    },
+    {
+      "id": "baseboard_removal",
+      "description": "Baseboard Removal & Debris Disposal",
+      "unit": "LF",
+      "rate": 2.85
+    },
+    {
+      "id": "tile_flooring_demo",
+      "description": "Ceramic / Porcelain Tile Flooring Demolition to Slab",
+      "unit": "SF",
+      "rate": 8.5
+    },
+    {
+      "id": "carpet_pad_pull",
+      "description": "Carpet & Wet Pad Extraction, Cut & Pull",
+      "unit": "SF",
+      "rate": 1.65
+    },
+    {
+      "id": "vanity_detach_reset",
+      "description": "Vanity Cabinet Detach & Reset (with Collateral Waiver)",
+      "unit": "EA",
+      "rate": 285.0
+    },
+    {
+      "id": "lgr_dehumidifier_day",
+      "description": "Low Grain Refrigerant (LGR) Dehumidifier Rental",
+      "unit": "Day",
+      "rate": 145.0
+    },
+    {
+      "id": "air_mover_day",
+      "description": "Centrifugal Air Mover Rental (Floor / Cavity)",
+      "unit": "Day",
+      "rate": 38.0
+    },
+    {
+      "id": "antimicrobial_spray",
+      "description": "Antimicrobial Botanical Spray Application (EPA Reg.)",
+      "unit": "SF",
+      "rate": 0.42
+    },
+    {
+      "id": "vinyl_flooring_demo",
+      "description": "Vinyl / Linoleum Sheet Flooring Demolition to Subfloor",
+      "unit": "SF",
+      "rate": 3.5
+    }
+  ],
+  "tiers": [
+    {
+      "threshold": 1499.0,
+      "name": "Tier 1 - Minor Chamber Containment & Drying",
+      "description": "Minor single-room containment and light drying"
+    },
+    {
+      "threshold": 1999.0,
+      "name": "Tier 2 - Standard Room Mitigation",
+      "description": "Standard room mitigation with 2-ft cuts and 3-day drying"
+    },
+    {
+      "threshold": 2499.0,
+      "name": "Tier 3 - Multi-Room Loss & Heavy Demo",
+      "description": "Multi-room loss, vanity detach, tile demolition"
+    },
+    {
+      "threshold": 2799.0,
+      "name": "Tier 4 - Extensive Structural Mitigation",
+      "description": "Extensive structural mitigation, heavy demo, Category 3 containment"
+    },
+    {
+      "threshold": 3999.0,
+      "name": "Tier 5 - Heavy Multi-Chamber Mitigation",
+      "description": "Heavy multi-chamber mitigation, whole-structure drying, extensive demo"
+    }
+  ],
+  "largeLoss": {
+    "name": "Custom Large-Loss Itemized Contract",
+    "description": "Loss scope exceeds Tier 5 standard flat-fee threshold; itemized billing applies"
+  }
+}

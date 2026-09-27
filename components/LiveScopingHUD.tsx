@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { snapToFinancialTier } from "@/services/pricingEngine";
 import { enqueueOfflineTurn } from "@/lib/offlineStorage";
 import {
   Mic,

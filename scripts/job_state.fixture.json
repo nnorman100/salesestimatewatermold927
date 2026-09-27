@@ -1,0 +1,61 @@
+{
+  "lossId": "ADR-PARITY-FIXTURE",
+  "inspectionDate": "2026-09-27",
+  "status": "IN_PROGRESS",
+  "isAfterHours": false,
+  "customer": {
+    "name": "Parity Fixture Customer",
+    "serviceAddress": "123 Boundary St, Bakersfield, CA",
+    "phone": "555-0199",
+    "email": "fixture@example.com",
+    "dateOfLoss": "2026-09-26",
+    "technician": "Tech Parity"
+  },
+  "property": {
+    "buildYear": 1992,
+    "isPre1978": false,
+    "asbestosLeadTestingMandated": false,
+    "statutoryCitations": [],
+    "statutoryNotice": "",
+    "plumbingEra": "1978-1995",
+    "forensicPlumbingDiagnostic": ""
+  },
+  "psychrometricBaseline": {
+    "unaffectedRoom": "Living Room",
+    "drywallBaselineWME": 9.2,
+    "tempF": 72,
+    "rhPercent": 45
+  },
+  "chambers": [
+    {
+      "roomId": "room_master_bath",
+      "name": "Master Bath",
+      "waterCategory": "Category 2",
+      "waterClass": "Class 2",
+      "moistureReadings": [],
+      "demolition": {
+        "floodCuts": { "heightFt": 2, "linearFeet": 28, "locations": "South and West walls" },
+        "baseboards": { "linearFeet": 28, "action": "Removal & Disposal" },
+        "flooring": { "substrate": "Ceramic tile demo to slab", "squareFeet": 50 }
+      },
+      "cabinetry": [
+        { "item": "Double Vanity", "action": "Detach & Reset", "waiver": "Waiver applies" }
+      ],
+      "homeownerObligations": [],
+      "equipment": [
+        { "type": "Low Grain Refrigerant (LGR) Dehumidifier", "count": 1, "days": 3 },
+        { "type": "Centrifugal Air Mover", "count": 2, "days": 3 }
+      ],
+      "verified": true,
+      "verificationSummary": "Master Bath scope verified."
+    }
+  ],
+  "scopeItems": [],
+  "financialTier": {
+    "subtotal": 2208.8,
+    "snappedTier": 2499.0,
+    "tierName": "Tier 3 - Multi-Room Loss & Heavy Demo",
+    "tierDescription": "Multi-room loss, vanity detach, tile demolition",
+    "isCustomLargeLoss": false
+  }
+}

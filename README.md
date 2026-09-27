@@ -14,7 +14,7 @@ An AI-powered, real-time forensic restoration engineering and field scoping copi
 - **Deterministic Pricing Engine & Tier Snapping:**
   - Code-backed rate schedule strictly enforces non-hallucinated math.
   - Automatically snaps subtotal to standard Alert Disaster Restoration Flat Fee Tiers ($1,499, $1,999, $2,499, $2,799, $3,999) or transitions into custom large-loss contracts.
-  - 100% cross-language serialization parity between Python (`pricing_engine.py`) and TypeScript (`pricingEngine.ts`).
+  - Rates and dollar totals match across Python (`pricing_engine.py`) and TypeScript (`pricingEngine.ts`); string display and the parity test live in `pricing_manifest.json` and `scripts/test_pricing.ts`.
 
 - **California Statutory Compliance & Forensic Plumbing:**
   - Automated detection of building age against the California 1978 cutoff.

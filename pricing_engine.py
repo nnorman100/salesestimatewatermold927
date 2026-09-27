@@ -3,12 +3,19 @@ Alert Disaster Restoration — Deterministic Pricing Engine & Tier Snapper
 Enforces non-hallucinated, code-backed pricing for restoration field scopes.
 """
 
+import argparse
 import json
 import math
 import sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+
+
+def _round_half_up(value: float, ndigits: int = 0) -> float:
+    """Round half-up (matches TS Math.round) to ``ndigits`` decimal places so the two engines agree on the .x5 boundary."""
+    factor = 10.0 ** ndigits
+    return math.floor(value * factor + 0.5) / factor
 
 
 def calculate_psychrometrics(temp_f: float, rh_percent: float) -> Dict[str, float]:
@@ -28,11 +35,11 @@ def calculate_psychrometrics(temp_f: float, rh_percent: float) -> Dict[str, floa
     # Humidity ratio (mass of water vapor per mass of dry air in lbs/lb)
     humidity_ratio = 0.62198 * e / (p_atm - e)
     # Grains per pound (7000 grains = 1 lb)
-    gpp = round(humidity_ratio * 7000.0, 1)
+    gpp = _round_half_up(humidity_ratio * 7000.0, 1)
     # Dew point calculation
     alpha = ((17.67 * temp_c) / (temp_c + 243.5)) + math.log(rh_clamped / 100.0)
     dew_point_c = (243.5 * alpha) / (17.67 - alpha)
-    dew_point_f = round(dew_point_c * 9.0 / 5.0 + 32.0, 1)
+    dew_point_f = _round_half_up(dew_point_c * 9.0 / 5.0 + 32.0, 1)
 
     return {
         "tempF": float(temp_f),
@@ -165,53 +172,30 @@ TIER_TABLE: List[Tuple[Decimal, Decimal, str, str]] = [
     ),
 ]
 
+# Large-loss display strings (single source of truth, emitted into pricing_manifest.json).
+LARGE_LOSS_NAME = "Custom Large-Loss Itemized Contract"
+LARGE_LOSS_DESCRIPTION = "Loss scope exceeds Tier 5 standard flat-fee threshold; itemized billing applies"
+
 
 def snap_to_tier(subtotal: Decimal) -> Dict[str, Any]:
     """Snaps calculated line item subtotal to Alert Disaster Restoration Flat Fee Tier."""
-    if subtotal <= Decimal("1499.00"):
-        return {
-            "snappedTier": 1499.00,
-            "tierName": "Tier 1 - Minor Chamber Containment & Drying",
-            "tierDescription": "Minor single-room containment and light drying",
-            "isCustomLargeLoss": False,
-        }
-    elif subtotal <= Decimal("1999.00"):
-        return {
-            "snappedTier": 1999.00,
-            "tierName": "Tier 2 - Standard Room Mitigation",
-            "tierDescription": "Standard room mitigation with 2-ft cuts and 3-day drying",
-            "isCustomLargeLoss": False,
-        }
-    elif subtotal <= Decimal("2499.00"):
-        return {
-            "snappedTier": 2499.00,
-            "tierName": "Tier 3 - Multi-Room Loss & Heavy Demo",
-            "tierDescription": "Multi-room loss, vanity detach, tile demolition",
-            "isCustomLargeLoss": False,
-        }
-    elif subtotal <= Decimal("2799.00"):
-        return {
-            "snappedTier": 2799.00,
-            "tierName": "Tier 4 - Extensive Structural Mitigation",
-            "tierDescription": "Extensive structural mitigation, heavy demo, Category 3 containment",
-            "isCustomLargeLoss": False,
-        }
-    elif subtotal <= Decimal("3999.00"):
-        return {
-            "snappedTier": 3999.00,
-            "tierName": "Tier 5 - Heavy Multi-Chamber Mitigation",
-            "tierDescription": "Heavy multi-chamber mitigation, whole-structure drying, extensive demo",
-            "isCustomLargeLoss": False,
-        }
-    else:
-        # Large loss conversion
-        subtotal_float = float(subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
-        return {
-            "snappedTier": subtotal_float,
-            "tierName": "Custom Large-Loss Itemized Contract",
-            "tierDescription": "Loss scope exceeds Tier 5 standard flat-fee threshold; itemized billing applies",
-            "isCustomLargeLoss": True,
-        }
+    for _min, max_val, name, description in TIER_TABLE:
+        if subtotal <= max_val:
+            return {
+                "snappedTier": float(max_val),
+                "tierName": name,
+                "tierDescription": description,
+                "isCustomLargeLoss": False,
+            }
+
+    # Large loss conversion
+    subtotal_float = float(subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    return {
+        "snappedTier": subtotal_float,
+        "tierName": LARGE_LOSS_NAME,
+        "tierDescription": LARGE_LOSS_DESCRIPTION,
+        "isCustomLargeLoss": True,
+    }
 
 
 def calculate_pricing(scope_payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -278,11 +262,68 @@ def calculate_pricing(scope_payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def emit_config() -> Dict[str, Any]:
+    """Builds the canonical pricing manifest (rate card + tier table + large-loss strings) consumed by the TS engine."""
+    items = [
+        {
+            "id": key,
+            "description": info["description"],
+            "unit": info["unit"],
+            "rate": float(info["rate"]),
+        }
+        for key, info in RATE_SCHEDULE.items()
+    ]
+    tiers = [
+        {
+            "threshold": float(max_val),
+            "name": name,
+            "description": description,
+        }
+        for _min, max_val, name, description in TIER_TABLE
+    ]
+    return {
+        "items": items,
+        "tiers": tiers,
+        "largeLoss": {
+            "name": LARGE_LOSS_NAME,
+            "description": LARGE_LOSS_DESCRIPTION,
+        },
+    }
+
+
 def main():
-    """CLI Entrypoint: Reads current_scope.json or specified path, outputs JSON."""
-    input_file = Path("current_scope.json")
-    if len(sys.argv) > 1:
-        input_file = Path(sys.argv[1])
+    """CLI Entrypoint: `--emit-config` writes the manifest, otherwise prices a scope JSON."""
+    parser = argparse.ArgumentParser(
+        description="Alert Disaster Restoration deterministic pricing engine."
+    )
+    parser.add_argument(
+        "--emit-config",
+        action="store_true",
+        help="Emit the canonical pricing_manifest.json (rate card, tier table, large-loss text).",
+    )
+    parser.add_argument(
+        "--out",
+        type=str,
+        default=None,
+        help="Write --emit-config output to this path instead of stdout.",
+    )
+    parser.add_argument(
+        "scope_file",
+        nargs="?",
+        default="current_scope.json",
+        help="Input scope JSON to price (default: current_scope.json).",
+    )
+    args = parser.parse_args()
+
+    if args.emit_config:
+        manifest_text = json.dumps(emit_config(), indent=2) + "\n"
+        if args.out:
+            Path(args.out).write_text(manifest_text, encoding="utf-8")
+        else:
+            sys.stdout.write(manifest_text)
+        return
+
+    input_file = Path(args.scope_file)
 
     if not input_file.exists():
         empty_payload = {
