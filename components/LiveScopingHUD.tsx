@@ -10,6 +10,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { enqueueOfflineTurn } from "@/lib/offlineStorage";
+import { fetchWithAuth } from "@/lib/apiClient";
 import {
   Mic,
   MicOff,
@@ -168,9 +169,8 @@ export function LiveScopingHUD({
     }
 
     try {
-      const res = await fetch("/api/gemini/live-scope", {
+      const res = await fetchWithAuth("/api/gemini/live-scope", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(turnPayload),
       });
 

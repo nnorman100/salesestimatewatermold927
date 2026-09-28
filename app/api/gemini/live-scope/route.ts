@@ -9,8 +9,6 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
   }
-  // Audit trail: log the authenticated uid (no PII) on every request.
-  console.log(`live-scope request from authenticated user uid=${user.uid}`);
 
   try {
     const body = await req.json();

@@ -11,6 +11,13 @@ import { SAMPLE_JOBS } from "@/lib/sampleJobs";
 import { JobState } from "@/types/estimator";
 import { calculatePsychrometrics } from "@/services/pricingEngine";
 import {
+  onAuthChange,
+  signInWithGoogle,
+  signInWithEmailPassword,
+  signOutCurrentUser,
+} from "@/lib/apiClient";
+import type { User } from "firebase/auth";
+import {
   ShieldAlert,
   Flame,
   Droplets,
@@ -31,6 +38,16 @@ interface LandingProps {
 export function TechnicianLandingPage({ initialState, onLaunchHUD }: LandingProps) {
   const [job, setJob] = useState<JobState>(initialState);
   const [streamMode, setStreamMode] = useState<"voice" | "hybrid" | "video">("voice");
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authBusy, setAuthBusy] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [showEmailFallback, setShowEmailFallback] = useState<boolean>(false);
+  const [emailValue, setEmailValue] = useState<string>("");
+  const [passwordValue, setPasswordValue] = useState<string>("");
+
+  useEffect(() => {
+    return onAuthChange(setAuthUser);
+  }, []);
 
   // Psychrometric calculations
   const psy = calculatePsychrometrics(
@@ -78,6 +95,63 @@ export function TechnicianLandingPage({ initialState, onLaunchHUD }: LandingProp
     }
   };
 
+  // The /api routes added by the security fix gate every request behind Firebase
+  // ID-token verification, so the technician must sign in before the live-scope
+  // turn, offline-queue replay, Cloud Sync, or Cloud Sandbox PDF compile can
+  // reach the backend. The popup is the primary path; if it is blocked (e.g. in
+  // an embedded WebView) we fall back to an explicit email/password form below.
+  const handleGoogleSignIn = async () => {
+    setAuthError(null);
+    setAuthBusy(true);
+    try {
+      await signInWithGoogle();
+      setShowEmailFallback(false);
+    } catch (e: any) {
+      const code = e?.code ?? "";
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/popup-closed-by-user" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        setShowEmailFallback(true);
+      } else {
+        setAuthError(e?.message || "Sign-in failed");
+        setShowEmailFallback(true);
+      }
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleEmailSignIn = async () => {
+    if (!emailValue.trim() || !passwordValue) {
+      setAuthError("Email and password are required.");
+      return;
+    }
+    setAuthError(null);
+    setAuthBusy(true);
+    try {
+      await signInWithEmailPassword(emailValue.trim(), passwordValue);
+      setPasswordValue("");
+      setShowEmailFallback(false);
+    } catch (e: any) {
+      setAuthError(e?.message || "Sign-in failed");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setAuthBusy(true);
+    try {
+      await signOutCurrentUser();
+      setShowEmailFallback(false);
+      setAuthError(null);
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* ADR Brand Header */}
@@ -106,6 +180,93 @@ export function TechnicianLandingPage({ initialState, onLaunchHUD }: LandingProp
           <div className="text-[11px] text-red-400 font-semibold mt-1">IICRC S500 / S520 Standard</div>
           <div className="text-[10px] text-slate-400">Lead Estimator: Matthew Myers</div>
         </div>
+      </div>
+
+      {/* Firebase Auth Sign-in Gate */}
+      <div className="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2 shadow-sm">
+        {authUser ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-xs text-slate-700">
+              <span className="font-semibold text-slate-900">Signed in as:</span>{" "}
+              <span className="text-slate-800">{authUser.email ?? authUser.uid}</span>
+              {authUser.emailVerified ? (
+                <Badge variant="dry" className="ml-2 text-[10px]">Email verified</Badge>
+              ) : (
+                <Badge variant="destructive" className="ml-2 text-[10px]">Email not verified</Badge>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              disabled={authBusy}
+              className="text-xs border-slate-300 text-slate-800"
+            >
+              Sign out
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-slate-700">
+                <Lock className="inline w-3.5 h-3.5 mr-1 text-red-600" />
+                Sign in to sync field estimates and reach the Antigravity copilot.
+              </span>
+              <Button
+                type="button"
+                variant="adrAction"
+                size="sm"
+                onClick={handleGoogleSignIn}
+                disabled={authBusy}
+                className="text-xs"
+              >
+                {authBusy ? "Signing in…" : "Sign in with Google"}
+              </Button>
+            </div>
+            {showEmailFallback && (
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 pt-1">
+                <Input
+                  type="email"
+                  value={emailValue}
+                  onChange={(e) => setEmailValue(e.target.value)}
+                  placeholder="email@example.com"
+                  className="text-xs h-9"
+                  disabled={authBusy}
+                />
+                <Input
+                  type="password"
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
+                  placeholder="Password"
+                  className="text-xs h-9"
+                  disabled={authBusy}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleEmailSignIn();
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={handleEmailSignIn}
+                  disabled={authBusy}
+                  className="text-xs h-9"
+                >
+                  {authBusy ? "Signing in…" : "Sign in with email"}
+                </Button>
+              </div>
+            )}
+            {authError && (
+              <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+                {authError}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Quick Scenario Fast-Loader */}

@@ -51,6 +51,23 @@ export async function POST(req: NextRequest) {
 
     const docId = jobState.lossId || `ADR-${Date.now()}`;
     const db = getAdminFirestore();
+    const docRef = db.collection(ESTIMATES_COLLECTION).doc(docId);
+
+    // Reject the write when the target doc already belongs to another user.
+    // The Admin SDK bypasses firestore.rules, so this server-side check is the
+    // only thing standing between an authenticated attacker and an ownership
+    // takeover of a document they did not create.
+    const existing = await docRef.get();
+    if (existing.exists) {
+      const existingOwnerUid = existing.get("ownerUid");
+      if (existingOwnerUid && existingOwnerUid !== user.uid) {
+        return NextResponse.json(
+          { error: "forbidden", message: "Estimate already belongs to another user" },
+          { status: 403 }
+        );
+      }
+    }
+
     const payload = {
       ...jobState,
       lossId: docId,
@@ -60,7 +77,7 @@ export async function POST(req: NextRequest) {
       updatedAt: FieldValue.serverTimestamp(),
     };
 
-    await db.collection(ESTIMATES_COLLECTION).doc(docId).set(payload, { merge: true });
+    await docRef.set(payload, { merge: true });
     return NextResponse.json({ success: true, docId, message: "Estimate successfully saved to Firestore" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed saving estimate" }, { status: 500 });
