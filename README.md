@@ -95,6 +95,34 @@ Deploy to Google Cloud Run:
 gcloud run deploy alert-disaster-field-estimator \
   --source . \
   --project mitigation-project \
-  --region us-west2 \
-  --allow-unauthenticated
+  --region us-west2
 ```
+
+The service runs privately (no `--allow-unauthenticated`); access is enforced by the
+application itself via Firebase Auth on every `/api` route and `firestore.rules` on
+the `estimates` collection, rather than by Cloud Run's public ingress.
+
+### 6. Authentication
+
+Every deployed API route (`/api/estimates`, `/api/gemini/live-scope`, and
+`/api/gemini/generate-pdf`) requires an `Authorization: Bearer <Firebase ID token>`
+header and returns `401` without a valid token. The client reads the six
+`NEXT_PUBLIC_FIREBASE_*` values (`API_KEY`, `AUTH_DOMAIN`, `PROJECT_ID`,
+`STORAGE_BUCKET`, `MESSAGING_SENDER_ID`, `APP_ID`) plus
+`NEXT_PUBLIC_FIRESTORE_DATABASE_ID`; the server reads the Firebase Admin
+service-account credentials (`FIREBASE_ADMIN_PROJECT_ID`,
+`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`) to verify ID tokens.
+All of these are documented in `.env.example`. Firestore access to the `estimates`
+collection is additionally restricted by `firestore.rules` to the authenticated
+document owner.
+
+To obtain the Admin service account: in the Firebase console, open **Project
+settings → Service accounts → Generate new private key**, then copy `project_id`,
+`client_email`, and `private_key` into the three `FIREBASE_ADMIN_*` variables in
+`.env.local` (never commit that file). See the
+[Firebase service-account docs](https://firebase.google.com/docs/admin/setup) for details.
+
+> **Security note:** an earlier revision of this repository committed a hardcoded
+> Firebase API key in `lib/firebase.ts`, so that key is exposed in the public git
+> history and should be treated as burned. Rotate it in the Google Cloud console
+> (**APIs & Services → Credentials**) before or immediately after merging this change.

@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /estimates/{estimateId} {
+      // Every read/write to the estimates collection requires an authenticated,
+      // email-verified user; anonymous and service-account traffic is denied here
+      // (the Admin SDK, used by the server behind /api/estimates, bypasses rules).
+      function isVerifiedUser() {
+        return request.auth != null
+          && request.auth.token.email_verified == true;
+      }
+
+      // Existing documents: only their owner may read or delete them.
+      allow read, delete: if isVerifiedUser()
+        && resource.data.ownerUid == request.auth.uid;
+
+      // Updates: only the owner, and ownership cannot be transferred.
+      allow update: if isVerifiedUser()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      // Creation: the document must be created with the caller as its owner.
+      allow create: if isVerifiedUser()
+        && request.resource.data.ownerUid == request.auth.uid;
+    }
+  }
+}
