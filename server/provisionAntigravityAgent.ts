@@ -16,7 +16,7 @@ export async function createRestorationAntigravityAgent() {
     'utf-8'
   );
   const pricingEngineContent = fs.readFileSync(path.join(process.cwd(), 'pricing_engine.py'), 'utf-8');
-  const seedJobStateContent = fs.readFileSync(path.join(process.cwd(), 'job_state.seed.json'), 'utf-8');
+  const seedJobStateContent = fs.readFileSync(path.join(process.cwd(), 'job_state.example.json'), 'utf-8');
   const proposalTemplateContent = fs.readFileSync(path.join(process.cwd(), 'proposal_template.html'), 'utf-8');
   const compileProposalContent = fs.readFileSync(path.join(process.cwd(), 'compile_proposal.py'), 'utf-8');
 

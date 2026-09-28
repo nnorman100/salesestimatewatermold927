@@ -82,7 +82,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm test
 ```
 
-Executes the 14-test end-to-end integration suite covering service calls, tier snapping, large-loss conversions, room verification phrasing, thermal delta extraction, and Python/TypeScript pricing interoperability.
+Executes the 33-assertion end-to-end integration suite covering service calls, tier snapping, large-loss conversions, room verification phrasing, thermal delta extraction, and Python/TypeScript pricing interoperability.
 
 ### 5. Production Build & Deployment
 

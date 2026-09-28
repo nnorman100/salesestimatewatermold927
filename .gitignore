@@ -12,6 +12,8 @@ node_modules/
 .adk/
 tsconfig.tsbuildinfo
 job_state.json
+job_state*.json
+!job_state.example.json
 current_scope.json
 proposal.html
 proposal.pdf
