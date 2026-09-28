@@ -706,14 +706,18 @@ def compile_proposal(
     with open(job_state_path, "r", encoding="utf-8") as f:
         job_state = json.load(f)
 
-    # Calculate pricing
-    scope_items = job_state.get("scopeItems", [])
-    pricing = calculate_pricing({"items": scope_items})
-
-    # Update job state with latest pricing
-    job_state["financialTier"] = pricing["financialTier"]
-    with open(job_state_path, "w", encoding="utf-8") as f:
-        json.dump(job_state, f, indent=2)
+    # Prefer pricing stamped on the job state by the live-scope route; fall back
+    # to calculate_pricing only for legacy job_state.json files that lack it.
+    scope_items = job_state.get("scopeItems") or []
+    stamped = job_state.get("financialTier")
+    if stamped and stamped.get("snappedTier"):
+        pricing = {
+            "lineItems": scope_items,
+            "subtotal": stamped.get("subtotal", 0.0),
+            "financialTier": stamped,
+        }
+    else:  # legacy job_state.json without stamped pricing
+        pricing = calculate_pricing({"items": scope_items})
 
     # Generate HTML: prefer proposal_template.html if available and use_template is True
     template_file = Path("proposal_template.html")

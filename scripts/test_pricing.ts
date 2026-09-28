@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   calculatePricingFromJob,
@@ -181,6 +182,62 @@ function main(): void {
         collectDiffs(`${name}.lineItems[${i}].lineTotal`, t.lineTotal, p.lineTotal, failures);
       }
       console.log(`✓ ${name}: ${n} line items + financialTier match across engines.`);
+    }
+  }
+
+  // 6. compile_proposal.py pass-through: a stamped financialTier must win over
+  //    the calculate_pricing re-derivation from scopeItems (the scout-reproduced
+  //    divergence: stamped Tier 3 / $2,499 vs re-derived Tier 1 / $1,499).
+  {
+    const PY_COMPILE = `
+import sys
+from pathlib import Path
+import compile_proposal
+job_state_path = Path(sys.argv[1])
+out_dir = Path(sys.argv[2])
+result = compile_proposal.compile_proposal(
+    job_state_path=job_state_path,
+    html_output_path=out_dir / "proposal.html",
+    pdf_output_path=out_dir / "proposal.pdf",
+    use_template=True,
+)
+print(result["htmlPath"])
+`;
+
+    type LegacyJobState = Omit<JobState, "financialTier"> & { financialTier?: JobState["financialTier"] };
+
+    const tmp = mkdtempSync(join(tmpdir(), "pdf-pass-through-"));
+    try {
+      // (a) Stamped case: the fixture ships scopeItems: [] but a stamped Tier 3 / $2,499.
+      const stampedDir = join(tmp, "stamped");
+      mkdirSync(stampedDir, { recursive: true });
+      runPython(["-c", PY_COMPILE, join(ROOT, "scripts", "job_state.fixture.json"), stampedDir]);
+      const stampedHtml = readFileSync(join(stampedDir, "proposal.html"), "utf-8");
+
+      if (!stampedHtml.includes("2,499")) failures.push("stamped HTML missing stamped $2,499 figure");
+      if (!stampedHtml.includes("Tier 3")) failures.push("stamped HTML missing stamped Tier 3 name");
+      if (stampedHtml.includes("1,499")) failures.push("stamped HTML shows re-derived $1,499");
+      if (stampedHtml.includes("Tier 1")) failures.push("stamped HTML shows re-derived Tier 1 name");
+
+      // (b) Legacy case: scopeItems: [] and no financialTier -> calculate_pricing fallback
+      //     still snaps to the Tier 1 default and the PDF remains valid.
+      const legacy = JSON.parse(JSON.stringify(loadFixture())) as LegacyJobState;
+      legacy.scopeItems = [];
+      delete legacy.financialTier;
+      const legacyPath = join(tmp, "legacy_job_state.json");
+      writeFileSync(legacyPath, JSON.stringify(legacy, null, 2), "utf-8");
+      const legacyDir = join(tmp, "legacy");
+      mkdirSync(legacyDir, { recursive: true });
+      runPython(["-c", PY_COMPILE, legacyPath, legacyDir]);
+      const legacyHtml = readFileSync(join(legacyDir, "proposal.html"), "utf-8");
+
+      if (!existsSync(join(legacyDir, "proposal.html"))) failures.push("legacy HTML not produced");
+      if (!legacyHtml.includes("1,499")) failures.push("legacy HTML missing default $1,499 (fallback not reached)");
+      if (!legacyHtml.includes("Tier 1")) failures.push("legacy HTML missing default Tier 1 (fallback not reached)");
+
+      console.log("✓ compile_proposal.py passes through stamped financialTier; legacy fallback still renders.");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
     }
   }
 
