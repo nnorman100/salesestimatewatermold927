@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveEstimateToFirestore, getEstimatesFromFirestore } from "@/services/firestoreService";
+import { FieldValue } from "firebase-admin/firestore";
+import { verifyIdToken } from "@/lib/auth";
+import { getAdminFirestore } from "@/lib/admin";
 
-export async function GET() {
+const ESTIMATES_COLLECTION = "estimates";
+
+export async function GET(req: NextRequest) {
+  const user = await verifyIdToken(req);
+  if (!user) {
+    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  }
+  if (!user.emailVerified) {
+    // Mirrors firestore.rules: only email-verified users may touch `estimates`.
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
   try {
-    const estimates = await getEstimatesFromFirestore();
+    const db = getAdminFirestore();
+    const snapshot = await db
+      .collection(ESTIMATES_COLLECTION)
+      .where("ownerUid", "==", user.uid)
+      .get();
+
+    const estimates = snapshot.docs
+      .map((d) => d.data())
+      // Sort newest-first in memory (avoids requiring a composite index).
+      .sort((a, b) => String(b.inspectionDate ?? "").localeCompare(String(a.inspectionDate ?? "")));
     return NextResponse.json({ success: true, count: estimates.length, estimates });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed fetching estimates" }, { status: 500 });
@@ -11,6 +33,15 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const user = await verifyIdToken(req);
+  if (!user) {
+    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  }
+  if (!user.emailVerified) {
+    // Mirrors firestore.rules: only email-verified users may touch `estimates`.
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
     const { jobState } = body;
@@ -18,7 +49,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing jobState payload" }, { status: 400 });
     }
 
-    const docId = await saveEstimateToFirestore(jobState);
+    const docId = jobState.lossId || `ADR-${Date.now()}`;
+    const db = getAdminFirestore();
+    const payload = {
+      ...jobState,
+      lossId: docId,
+      // Ownership is pinned to the authenticated caller so firestore.rules and
+      // this write path can never attribute a document to another user.
+      ownerUid: user.uid,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    await db.collection(ESTIMATES_COLLECTION).doc(docId).set(payload, { merge: true });
     return NextResponse.json({ success: true, docId, message: "Estimate successfully saved to Firestore" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed saving estimate" }, { status: 500 });

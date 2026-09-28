@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Printer, Download, ArrowLeft, CheckCircle2, RotateCcw, ShieldCheck, CloudUpload } from "lucide-react";
 import { saveEstimateToFirestore } from "@/services/firestoreService";
+import { getFirebaseAuth } from "@/lib/firebase";
 
 interface DocumentProps {
   job: JobState;
@@ -31,7 +32,10 @@ export function AlertEstimateDocument({
     setIsSyncingFirestore(true);
     setFirestoreSuccess(false);
     try {
-      await saveEstimateToFirestore(job);
+      // Attribute the document to the signed-in Firebase user so `firestore.rules`
+      // can enforce per-owner read/write access.
+      const ownerUid = getFirebaseAuth()?.currentUser?.uid;
+      await saveEstimateToFirestore(job, ownerUid);
       setFirestoreSuccess(true);
     } catch (e) {
       console.error("Firestore sync error:", e);

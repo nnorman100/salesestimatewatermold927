@@ -3,6 +3,7 @@ import { calculatePricingFromJob, snapToFinancialTier } from "../services/pricin
 import { POST } from "../app/api/gemini/live-scope/route";
 import { JobState } from "../types/estimator";
 import { NextRequest } from "next/server";
+import { __setTokenVerifierForTests } from "../lib/auth";
 
 function createBaseJob(): JobState {
   return {
@@ -60,6 +61,32 @@ function createBaseJob(): JobState {
 
 async function runTests() {
   console.log("=== RUNNING SUITE: Pricing Engine & Field Scoping Fixes ===");
+
+  // No live Firebase credentials in CI: substitute a fake ID-token verifier so the
+  // route's auth guard can be exercised offline. Requests below authenticate with
+  // `Authorization: Bearer test-token`; a request without it must still 401.
+  __setTokenVerifierForTests(async () => ({
+    uid: "test-authenticated-user",
+    email: "test@example.com",
+    emailVerified: true,
+  }));
+
+  // Test 0: Live Scope Route rejects unauthenticated requests with 401
+  console.log("\n[Test 0] Live Scope API - unauthenticated request rejected...");
+  const reqUnauth = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      technicianSpeech: "verify room scope for Master Bath",
+      currentRoom: "Master Bath",
+      jobState: createBaseJob(),
+    }),
+  });
+  const resUnauth = await POST(reqUnauth);
+  assert.strictEqual(resUnauth.status, 401, "Expected 401 for a request without an Authorization header");
+  const unauthBody = await resUnauth.json();
+  assert.strictEqual(unauthBody.error, "unauthenticated");
+  console.log("✓ Unauthenticated request rejected with 401.");
 
   // Test 1: Pricing engine basic service call
   console.log("\n[Test 1] Standard & After-Hours Service Calls...");
@@ -126,7 +153,7 @@ async function runTests() {
   const emptyCutsJob = createBaseJob();
   const reqNoCuts = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "verify room scope for Master Bath",
       currentRoom: "Master Bath",
@@ -147,7 +174,7 @@ async function runTests() {
   };
   const reqWithCuts = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "verify room scope for Master Bath",
       currentRoom: "Master Bath",
@@ -163,7 +190,7 @@ async function runTests() {
   console.log("\n[Test 6] Live Scope API - Moisture reading thermal delta check...");
   const reqMoistureNoDelta = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "West wall probe reads 28.5% WME",
       currentRoom: "Master Bath",
@@ -181,7 +208,7 @@ async function runTests() {
   console.log("\n[Test 7] Live Scope API - Moisture reading with dictated thermal delta...");
   const reqMoistureWithDelta = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "West wall probe reads 32.1% WME with a thermal delta of -3.5 degrees",
       currentRoom: "Master Bath",
@@ -199,7 +226,7 @@ async function runTests() {
   console.log("\n[Test 8] Live Scope API - Multimodal photo attached...");
   const reqPhoto = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "Photo of moisture meter LCD display",
       photoBase64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -216,7 +243,7 @@ async function runTests() {
   console.log("\n[Test 9] Live Scope API - Authoritative pricing sync...");
   const reqPricingSync = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "35 linear feet of 2-ft cut",
       currentRoom: "Master Bath",
@@ -252,7 +279,7 @@ print(json.dumps(res))
   console.log("\n[Test 11] Live Scope API - Flooring demolition parsing...");
   const reqFlooring = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "50 SF ceramic tile demo to concrete slab",
       currentRoom: "Master Bath",
@@ -269,7 +296,7 @@ print(json.dumps(res))
   console.log("\n[Test 12] Live Scope API - Equipment deployment parsing...");
   const reqEq = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     body: JSON.stringify({
       technicianSpeech: "deploy 1 LGR dehumidifier and 2 air movers for 3 days",
       currentRoom: "Master Bath",
@@ -289,7 +316,7 @@ print(json.dumps(res))
   for (let i = 0; i < 3; i++) {
     const reqDedup = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
       body: JSON.stringify({
         technicianSpeech: "homeowner to clear closet items before demo",
         currentRoom: "Master Bath",
@@ -308,7 +335,7 @@ print(json.dumps(res))
   for (let i = 0; i < 2; i++) {
     const reqMR = new NextRequest("http://localhost:3000/api/gemini/live-scope", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
       body: JSON.stringify({
         technicianSpeech: "drywall probe reads 38.4% WME",
         currentRoom: "Master Bath",
