@@ -50,7 +50,7 @@ ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
 # Copy python scripts, templates, and agent rules needed for offline/PDF proposal generation
-COPY pricing_engine.py copilot_engine.py compile_proposal.py proposal_template.html job_state.seed.json ./
+COPY pricing_engine.py copilot_engine.py compile_proposal.py proposal_template.html job_state.example.json ./
 COPY .agents ./.agents
 
 # Copy standalone build artifacts
