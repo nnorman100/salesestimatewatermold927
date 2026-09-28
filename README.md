@@ -68,6 +68,13 @@ LIVE_MODEL="gemini-2.0-flash-exp"
 LIVE_VOICE="Charon"
 ```
 
+`lib/firebase.ts` throws at startup when any of the six `NEXT_PUBLIC_FIREBASE_*`
+values (plus `NEXT_PUBLIC_FIRESTORE_DATABASE_ID`) is missing, so the Firebase
+client config must be set in `.env.local` before `npm run dev` will boot. The
+full key list (Firebase client **and** the `FIREBASE_ADMIN_*` service-account
+variables required for the `/api` routes) lives in `.env.example`; see
+[§6 Authentication](#6-authentication) for the per-variable walkthrough.
+
 ### 3. Local Development
 
 ```bash
@@ -82,7 +89,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm test
 ```
 
+<<<<<<< HEAD
 Executes the 33-assertion end-to-end integration suite covering service calls, tier snapping, large-loss conversions, room verification phrasing, thermal delta extraction, and Python/TypeScript pricing interoperability.
+=======
+Executes the 15-test end-to-end integration suite covering service calls, tier snapping, large-loss conversions, room verification phrasing, thermal delta extraction, unauthenticated-request rejection, and Python/TypeScript pricing interoperability.
+>>>>>>> 1218aae (no-mistakes(document): docs: point README quickstart to firebase envs and bump test count to 15)
 
 ### 5. Production Build & Deployment
 
