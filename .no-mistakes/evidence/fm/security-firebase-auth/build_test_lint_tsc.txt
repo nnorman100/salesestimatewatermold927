@@ -1,0 +1,39 @@
+=== npx tsc --noEmit ===
+npm notice run alert-disaster-restoration-estimator@1.0.0 npx
+npm notice run 'tsc' --noEmit
+exit=0
+
+=== npm test ===
+✓ All 12 rate-card descriptions, unit rates, and line totals match (incl. antimicrobial).
+✓ Psychrometrics parity across temperature/RH matrix (dew point + GPP).
+✓ Tier snapping parity (Tier 1 / 2 / 3 / 4 / 5 + large-loss boundary strings).
+✓ Tier 1 small scope: 1 line items + financialTier match across engines.
+✓ Tier 3 mid-scope (fixture): 7 line items + financialTier match across engines.
+✓ Tier 5 / large-loss boundary: 5 line items + financialTier match across engines.
+
+=== PRICING PARITY TEST PASSED ===
+exit=0
+
+=== npm run lint ===
+
+./components/AlertEstimateDocument.tsx
+88:6  Warning: React Hook useEffect has a missing dependency: 'job'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+88:7  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+88:31  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+./components/GoogleAddressAutocomplete.tsx
+68:6  Warning: React Hook useEffect has a missing dependency: 'query'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+exit=0
+
+=== npm run build ===
+  ├ chunks/255-2dbbf79f36f0dfa2.js       46.4 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB
+  └ other shared chunks (total)           1.9 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+exit=0

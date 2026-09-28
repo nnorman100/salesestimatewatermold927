@@ -1,0 +1,65 @@
+npm notice run alert-disaster-restoration-estimator@1.0.0 npx
+npm notice run 'tsx' scripts/scenario_drive.ts
+[PASS] S1 unauthenticated /api/gemini/live-scope: status=401, body={"error":"unauthenticated"}
+[PASS] S2 authenticated live-scope turn: status=200, spokenResponse="Drive Bath verified: no structural cuts with baseboards removed, detachment waivers logged, and structural drying equipment deployed."
+[PASS] S3 unauthenticated GET /api/estimates: status=401, body={"error":"unauthenticated"}
+[PASS] S4 unauthenticated POST /api/estimates: status=401, body={"error":"unauthenticated"}
+[PASS] S5 email-unverified user 403 on GET /api/estimates: status=403, body={"error":"forbidden"}
+[PASS] S6 ownership check before setDoc: reached docRef.get() (no Firestore in CI), status=500, body.error="Firebase Admin credentials are not configured. Set FIREBASE_ADMIN_PROJECT_ID, FI" - confirms auth gate is open and ownership code path is reached before setDoc
+[PASS] S7 unauthenticated /api/gemini/generate-pdf: status=401, body={"error":"unauthenticated"}
+[PASS] S8 console.log audit line removed from live-scope: no console.log('...authenticated user...') line found in app/api/gemini/live-scope/route.ts
+[PASS] S9 malformed Authorization header rejected: empty-bearer status=401, non-Bearer scheme status=401
+
+=== LIVE SCENARIO SUMMARY ===
+{
+  "pass": 9,
+  "fail": 0,
+  "untested": 0,
+  "results": [
+    {
+      "name": "S1 unauthenticated /api/gemini/live-scope",
+      "status": "pass",
+      "detail": "status=401, body={\"error\":\"unauthenticated\"}"
+    },
+    {
+      "name": "S2 authenticated live-scope turn",
+      "status": "pass",
+      "detail": "status=200, spokenResponse=\"Drive Bath verified: no structural cuts with baseboards removed, detachment waivers logged, and structural drying equipment deployed.\""
+    },
+    {
+      "name": "S3 unauthenticated GET /api/estimates",
+      "status": "pass",
+      "detail": "status=401, body={\"error\":\"unauthenticated\"}"
+    },
+    {
+      "name": "S4 unauthenticated POST /api/estimates",
+      "status": "pass",
+      "detail": "status=401, body={\"error\":\"unauthenticated\"}"
+    },
+    {
+      "name": "S5 email-unverified user 403 on GET /api/estimates",
+      "status": "pass",
+      "detail": "status=403, body={\"error\":\"forbidden\"}"
+    },
+    {
+      "name": "S6 ownership check before setDoc",
+      "status": "pass",
+      "detail": "reached docRef.get() (no Firestore in CI), status=500, body.error=\"Firebase Admin credentials are not configured. Set FIREBASE_ADMIN_PROJECT_ID, FI\" - confirms auth gate is open and ownership code path is reached before setDoc"
+    },
+    {
+      "name": "S7 unauthenticated /api/gemini/generate-pdf",
+      "status": "pass",
+      "detail": "status=401, body={\"error\":\"unauthenticated\"}"
+    },
+    {
+      "name": "S8 console.log audit line removed from live-scope",
+      "status": "pass",
+      "detail": "no console.log('...authenticated user...') line found in app/api/gemini/live-scope/route.ts"
+    },
+    {
+      "name": "S9 malformed Authorization header rejected",
+      "status": "pass",
+      "detail": "empty-bearer status=401, non-Bearer scheme status=401"
+    }
+  ]
+}

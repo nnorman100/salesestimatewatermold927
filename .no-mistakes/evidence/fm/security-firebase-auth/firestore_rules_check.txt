@@ -1,0 +1,14 @@
+=== firestore.rules semantic validation ===
+Found 3 rule(s):
+  - read, delete => isVerifiedUser() && resource.data.ownerUid == request.auth.uid
+  - update => isVerifiedUser() && resource.data.ownerUid == request.auth.uid && request.resource.data.ownerUid == request.auth.uid
+  - create => isVerifiedUser() && request.resource.data.ownerUid == request.auth.uid
+
+PASS - read,delete requires verified + owner
+PASS - update requires verified + owner + immutable ownerUid
+PASS - create requires verified + caller is owner
+
+The 3 firestore.rules predicates enforce the security model:
+  - Reads/deletes are restricted to the document's owner and require email verification
+  - Updates pin ownerUid so it cannot be transferred to another user
+  - Creates attribute the new doc to the caller as owner

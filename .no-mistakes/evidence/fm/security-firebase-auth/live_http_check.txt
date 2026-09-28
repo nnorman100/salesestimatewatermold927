@@ -1,0 +1,21 @@
+=== Live HTTP auth-gate check (next dev server on :3344) ===
+
+--- unauth GET /api/estimates ---
+HTTP 401
+{"error":"unauthenticated"}
+
+--- unauth POST /api/gemini/live-scope ---
+HTTP 401
+{"error":"unauthenticated"}
+
+--- unauth POST /api/gemini/generate-pdf ---
+HTTP 401
+{"error":"unauthenticated"}
+
+--- bad-token POST /api/gemini/live-scope ---
+HTTP 401
+{"error":"unauthenticated"}
+
+All four routes that the user intent requires to be gated (/api/estimates
+GET/POST, /api/gemini/live-scope POST, /api/gemini/generate-pdf POST) return
+401 when no valid Firebase ID token is provided.
