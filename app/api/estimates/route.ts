@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
     const estimates = snapshot.docs
       .map((d: QueryDocumentSnapshot) => d.data())
       // Sort newest-first in memory (avoids requiring a composite index).
-      .sort((a, b) => String(b.inspectionDate ?? "").localeCompare(String(a.inspectionDate ?? "")));
+      .sort((a: { inspectionDate?: string }, b: { inspectionDate?: string }) =>
+        String(b.inspectionDate ?? "").localeCompare(String(a.inspectionDate ?? "")));
     return NextResponse.json({ success: true, count: estimates.length, estimates });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed fetching estimates" }, { status: 500 });
