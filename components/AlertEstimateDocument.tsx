@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Printer, Download, ArrowLeft, CheckCircle2, RotateCcw, ShieldCheck, CloudUpload } from "lucide-react";
 import { saveEstimateToFirestore } from "@/services/firestoreService";
+import { getFirebaseAuth } from "@/lib/firebase";
+import { fetchWithAuth, onAuthChange } from "@/lib/apiClient";
+import type { User } from "firebase/auth";
 
 interface DocumentProps {
   job: JobState;
@@ -26,12 +29,24 @@ export function AlertEstimateDocument({
   const [remotePdfSuccess, setRemotePdfSuccess] = useState(false);
   const [isSyncingFirestore, setIsSyncingFirestore] = useState(false);
   const [firestoreSuccess, setFirestoreSuccess] = useState(false);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    return onAuthChange(setAuthUser);
+  }, []);
 
   const handleSyncToFirestore = async () => {
     setIsSyncingFirestore(true);
     setFirestoreSuccess(false);
     try {
-      await saveEstimateToFirestore(job);
+      // Attribute the document to the signed-in Firebase user so `firestore.rules`
+      // can enforce per-owner read/write access.
+      const ownerUid = getFirebaseAuth()?.currentUser?.uid;
+      if (!ownerUid) {
+        console.warn("Skipping Firestore sync: no signed-in user; firestore.rules would reject the write.");
+        return;
+      }
+      await saveEstimateToFirestore(job, ownerUid);
       setFirestoreSuccess(true);
     } catch (e) {
       console.error("Firestore sync error:", e);
@@ -141,9 +156,8 @@ export function AlertEstimateDocument({
     setIsCompilingRemotePdf(true);
     setRemotePdfSuccess(false);
     try {
-      const res = await fetch("/api/gemini/generate-pdf", {
+      const res = await fetchWithAuth("/api/gemini/generate-pdf", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobState: job }),
       });
       if (res.ok) {
@@ -178,8 +192,9 @@ export function AlertEstimateDocument({
             variant="outline"
             size="sm"
             onClick={handleSyncToFirestore}
-            disabled={isSyncingFirestore}
-            className="text-xs text-blue-700 border-blue-300 hover:bg-blue-50"
+            disabled={isSyncingFirestore || !authUser}
+            className="text-xs text-blue-700 border-blue-300 hover:bg-blue-50 disabled:text-slate-400 disabled:border-slate-300"
+            title={!authUser ? "Sign in on the landing page before syncing to Firestore" : undefined}
           >
             <CloudUpload className="w-3.5 h-3.5 mr-1" />
             <span>{isSyncingFirestore ? "Syncing..." : "Sync to Firestore"}</span>

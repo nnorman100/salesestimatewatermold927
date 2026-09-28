@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { JobState } from "@/types/estimator";
 import { SAMPLE_JOBS } from "@/lib/sampleJobs";
 import { saveOfflineJobState, loadOfflineJobState, clearOfflineQueue, getOfflineQueue, removeOfflineTurn } from "@/lib/offlineStorage";
+import { fetchWithAuth } from "@/lib/apiClient";
 import { TechnicianLandingPage } from "@/components/TechnicianLandingPage";
 import { LiveScopingHUD } from "@/components/LiveScopingHUD";
 import { AlertEstimateDocument } from "@/components/AlertEstimateDocument";
@@ -47,9 +48,8 @@ export default function Home() {
     let currentState = jobState;
     for (const turn of queue) {
       try {
-        const res = await fetch("/api/gemini/live-scope", {
+        const res = await fetchWithAuth("/api/gemini/live-scope", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             technicianSpeech: turn.technicianSpeech,
             photoBase64: turn.photoBase64,

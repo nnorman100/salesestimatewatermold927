@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { calculatePricingFromJob } from "@/services/pricingEngine";
 import { JobState, ChamberScope } from "@/types/estimator";
 import { executeAntigravityScopingTurn } from "@/server/handleScopingInteraction";
+import { verifyIdToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const user = await verifyIdToken(req);
+  if (!user) {
+    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { technicianSpeech, photoBase64, currentRoom, buildYear, jobState, agentId, previousInteractionId } = body;

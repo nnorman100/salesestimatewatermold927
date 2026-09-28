@@ -3,10 +3,16 @@ import { execFile } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { promisify } from "node:util";
+import { verifyIdToken } from "@/lib/auth";
 
 const execFilePromise = promisify(execFile);
 
 export async function POST(req: NextRequest) {
+  const user = await verifyIdToken(req);
+  if (!user) {
+    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  }
+
   try {
     const { jobState } = await req.json();
 
