@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue, type QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { verifyIdToken } from "@/lib/auth";
 import { getAdminFirestore } from "@/lib/admin";
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       .get();
 
     const estimates = snapshot.docs
-      .map((d) => d.data())
+      .map((d: QueryDocumentSnapshot) => d.data())
       // Sort newest-first in memory (avoids requiring a composite index).
       .sort((a, b) => String(b.inspectionDate ?? "").localeCompare(String(a.inspectionDate ?? "")));
     return NextResponse.json({ success: true, count: estimates.length, estimates });
